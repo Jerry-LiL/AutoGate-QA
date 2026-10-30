@@ -99,10 +99,12 @@ The metrics below represent execution results measured locally on this Linux dev
 
 | Test Suite | Framework / Runner | Total Tests / Requests | Passed | Failed | Skipped | Parallel Time | Serial Time |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Java Suite** | TestNG + Selenium 4 + REST Assured | 31 tests | 31 | 0 | 0 | 14.03 s (`thread-count=4`) | 6m 06 s (`-Dparallel=none`) |
-| **Python Suite** | PyTest + Playwright + Requests | 41 tests | 41 | 0 | 0 | 3.12 s (`-n 4`) | 6.76 s (`-n 0`) |
+| **Java Suite** | TestNG + Selenium 4 + REST Assured | 31 tests | 31 | 0 | 0 | ~9.5 s (`thread-count=4`) | ~18 s (`parallel="none"`) |
+| **Python Suite** | PyTest + Playwright + Requests | 41 tests | 41 | 0 | 0 | 2.5 s (`-n 4`) | 6.3 s (`-n 0`) |
 | **Newman Suite** | Newman CLI | 15 requests (33 assertions)| 15 (33) | 0 | 0 | 286 ms | 286 ms |
 | **Mobile Suite** | Appium + PyTest | 4 tests | 0 | 0 | 4 (offline skip)| N/A | 40 ms (skip) |
+
+> **Note**: `-Dparallel=none` does not override `testng.xml`; to run serially set `parallel="none"` in `testng.xml`.
 
 ---
 
@@ -110,7 +112,7 @@ The metrics below represent execution results measured locally on this Linux dev
 
 - **Java JDK**: Version 17 or 21 (`java -version`, `javac -version`)
 - **Maven**: Version 3.8+ (`mvn -version`)
-- **Node.js**: Version 22.5+ / 24 (`node -v`, `npm -v`)
+- **Node.js**: Version 22.5+ (node:sqlite) / 24 (`node -v`, `npm -v`)
 - **Python**: Version 3.12 or 3.13 (`python3 -v`)
 - **Google Chrome**: Stable release installed at `/usr/bin/google-chrome`
 - **Playwright Chromium**: Installed via Playwright CLI
@@ -155,8 +157,8 @@ The Java suite contains 31 automated tests covering UI workflows, API endpoints,
 # Execute full suite in parallel (default testng.xml)
 mvn -f java-tests/pom.xml clean test
 
-# Execute sequentially (single-threaded)
-mvn -f java-tests/pom.xml test -Dparallel=none -DthreadCount=1
+# Execute sequentially (set parallel="none" in testng.xml)
+mvn -f java-tests/pom.xml test
 
 # Execute a single test class
 mvn -f java-tests/pom.xml test -Dtest=CheckoutUiTest

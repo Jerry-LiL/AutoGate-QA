@@ -72,7 +72,7 @@ The testing pyramid is applied strictly across multiple isolated test harnesses:
 ### Entry Criteria
 1. System Under Test (SUT) starts successfully on designated port (`3000`) and reports `{"status":"UP"}` on `/health`.
 2. Seed script executes cleanly (`npm run reset`) and populates baseline users and catalog products.
-3. Node.js (20+), Java JDK (17/21), Python (3.12+), and Chrome browser are installed on the execution agent.
+3. Node.js 22.5+ (node:sqlite), Java JDK (17/21), Python (3.12+), and Chrome browser are installed on the execution agent.
 
 ### Exit Criteria
 1. 100% of automated tests pass across Java TestNG (31 tests), Python PyTest (41 tests), and Newman (15 requests, 33 assertions).
