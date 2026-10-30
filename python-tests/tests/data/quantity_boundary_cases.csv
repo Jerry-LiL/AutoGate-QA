@@ -1,0 +1,7 @@
+case_id,quantity,is_valid,description,expected_error
+TC_QTY_01,0,false,below minimum boundary (0),Quantity must be between 1 and 10
+TC_QTY_02,1,true,exact lower boundary (1),
+TC_QTY_03,2,true,nominal interior value (2),
+TC_QTY_04,10,true,exact upper boundary (10),
+TC_QTY_05,11,false,above maximum boundary (11),Quantity must be between 1 and 10
+TC_QTY_06,-1,false,negative value (-1),Quantity must be between 1 and 10
