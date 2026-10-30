@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         jdk 'temurin-17'
-        nodejs 'node-20'
+        nodejs 'node-24'
     }
 
     environment {
