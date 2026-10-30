@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProductResponse",
+  "type": "object",
+  "required": ["id", "name", "description", "price", "category", "stock"],
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "price": { "type": "number" },
+    "category": { "type": "string" },
+    "stock": { "type": "integer" },
+    "image_url": { "type": "string" }
+  }
+}
