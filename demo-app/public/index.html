@@ -8,15 +8,15 @@
 </head>
 <body>
   <header>
-    <a href="#" class="brand" data-testid="brand-logo" onclick="app.navigate('products')">AutoGate Shop</a>
+    <a href="#" class="brand" data-testid="brand-logo" onclick="event.preventDefault(); app.navigate('products')">AutoGate Shop</a>
     <nav>
-      <a href="#" data-testid="nav-products" onclick="app.navigate('products')">Products</a>
-      <a href="#" data-testid="nav-cart" onclick="app.navigate('cart')">
+      <a href="#" data-testid="nav-products" onclick="event.preventDefault(); app.navigate('products')">Products</a>
+      <a href="#" data-testid="nav-cart" onclick="event.preventDefault(); app.navigate('cart')">
         Cart <span class="badge" data-testid="cart-badge">0</span>
       </a>
-      <span data-testid="user-greeting" style="font-weight: 600; display: none;"></span>
-      <a href="#" data-testid="nav-login" onclick="app.navigate('login')">Login</a>
-      <button data-testid="nav-logout" onclick="app.logout()" style="display: none;">Logout</button>
+      <span id="user-greeting" data-testid="user-greeting" style="font-weight: 600; display: none;"></span>
+      <a href="#" data-testid="nav-login" onclick="event.preventDefault(); app.navigate('login')">Login</a>
+      <button type="button" data-testid="nav-logout" onclick="app.logout()" style="display: none;">Logout</button>
     </nav>
   </header>
 

@@ -407,8 +407,8 @@ app.post('/api/orders', authenticateToken, (req, res) => {
   let orderItems = items;
   const db = getDb();
 
-  // If items not provided, load items from user's cart
-  if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
+  // If items not explicitly provided, load items from user's cart
+  if (orderItems === undefined) {
     const cartRows = db.prepare(`
       SELECT c.product_id AS productId, c.quantity
       FROM cart_items c
@@ -421,6 +421,11 @@ app.post('/api/orders', authenticateToken, (req, res) => {
       });
     }
     orderItems = cartRows;
+  } else if (!Array.isArray(orderItems) || orderItems.length === 0) {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: 'Cart or order items must not be empty'
+    });
   }
 
   // Verify each item

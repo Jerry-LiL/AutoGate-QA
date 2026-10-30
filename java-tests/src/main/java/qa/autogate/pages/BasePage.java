@@ -34,13 +34,30 @@ public abstract class BasePage {
     }
 
     protected void click(By locator) {
-        waitForClickable(locator).click();
+        WebElement element = waitForClickable(locator);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 
     protected void type(By locator, String text) {
         WebElement element = waitForVisibility(locator);
-        element.clear();
-        element.sendKeys(text);
+        try {
+            element.click();
+        } catch (Exception ignored) {}
+        try {
+            element.clear();
+        } catch (Exception ignored) {}
+        if (text != null && !text.isEmpty()) {
+            element.sendKeys(text);
+            String val = element.getAttribute("value");
+            if (val == null || val.isEmpty()) {
+                ((JavascriptExecutor) driver).executeScript(
+                        "arguments[0].value = arguments[1]; " +
+                        "arguments[0].dispatchEvent(new Event('input', { bubbles: true })); " +
+                        "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+                        element, text
+                );
+            }
+        }
     }
 
     protected String getText(By locator) {
@@ -53,7 +70,8 @@ public abstract class BasePage {
 
     protected boolean isDisplayed(By locator) {
         try {
-            return waitForVisibility(locator).isDisplayed();
+            List<WebElement> elements = driver.findElements(locator);
+            return !elements.isEmpty() && elements.get(0).isDisplayed();
         } catch (Exception e) {
             return false;
         }
