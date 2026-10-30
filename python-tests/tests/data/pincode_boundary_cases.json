@@ -1,0 +1,32 @@
+[
+  {
+    "description": "5-digit pincode (length min - 1)",
+    "pincode": "56001",
+    "is_valid": false,
+    "expected_message": "Pincode must be exactly 6 numeric digits"
+  },
+  {
+    "description": "6-digit valid pincode (boundary exact)",
+    "pincode": "560001",
+    "is_valid": true,
+    "expected_message": ""
+  },
+  {
+    "description": "7-digit pincode (length max + 1)",
+    "pincode": "5600001",
+    "is_valid": false,
+    "expected_message": "Pincode must be exactly 6 numeric digits"
+  },
+  {
+    "description": "alphanumeric string with 6 chars",
+    "pincode": "56A001",
+    "is_valid": false,
+    "expected_message": "Pincode must be exactly 6 numeric digits"
+  },
+  {
+    "description": "pincode containing spaces",
+    "pincode": "56 001",
+    "is_valid": false,
+    "expected_message": "Pincode must be exactly 6 numeric digits"
+  }
+]

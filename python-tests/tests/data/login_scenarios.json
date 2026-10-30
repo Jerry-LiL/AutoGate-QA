@@ -1,0 +1,42 @@
+[
+  {
+    "scenario": "valid_admin_login",
+    "email": "admin@autogate.qa",
+    "password": "Admin@123",
+    "expected_status": 200,
+    "expected_role": "admin",
+    "should_succeed": true
+  },
+  {
+    "scenario": "valid_tester_login",
+    "email": "tester@autogate.qa",
+    "password": "Tester@123",
+    "expected_status": 200,
+    "expected_role": "customer",
+    "should_succeed": true
+  },
+  {
+    "scenario": "invalid_password",
+    "email": "tester@autogate.qa",
+    "password": "WrongPassword!99",
+    "expected_status": 401,
+    "expected_error": "Invalid email or password",
+    "should_succeed": false
+  },
+  {
+    "scenario": "nonexistent_email",
+    "email": "unknown.user@autogate.qa",
+    "password": "Password@123",
+    "expected_status": 401,
+    "expected_error": "Invalid email or password",
+    "should_succeed": false
+  },
+  {
+    "scenario": "empty_credentials",
+    "email": "",
+    "password": "",
+    "expected_status": 400,
+    "expected_error": "Email and password are required",
+    "should_succeed": false
+  }
+]

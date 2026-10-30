@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OrderResponse",
+  "type": "object",
+  "required": ["id", "orderNumber", "customerName", "customerEmail", "shippingAddress", "shippingCity", "shippingPincode", "paymentMethod", "totalAmount", "status", "items"],
+  "properties": {
+    "id": { "type": "integer" },
+    "orderNumber": { "type": "string" },
+    "customerName": { "type": "string" },
+    "customerEmail": { "type": "string" },
+    "shippingAddress": { "type": "string" },
+    "shippingCity": { "type": "string" },
+    "shippingPincode": { "type": "string" },
+    "paymentMethod": { "type": "string" },
+    "totalAmount": { "type": "number" },
+    "status": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["productId", "productName", "unitPrice", "quantity", "subtotal"],
+        "properties": {
+          "productId": { "type": "integer" },
+          "productName": { "type": "string" },
+          "unitPrice": { "type": "number" },
+          "quantity": { "type": "integer" },
+          "subtotal": { "type": "number" }
+        }
+      }
+    }
+  }
+}
