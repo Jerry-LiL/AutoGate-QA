@@ -110,7 +110,7 @@ The metrics below represent execution results measured locally on this Linux dev
 
 - **Java JDK**: Version 17 or 21 (`java -version`, `javac -version`)
 - **Maven**: Version 3.8+ (`mvn -version`)
-- **Node.js**: Version 20 or 24 (`node -v`, `npm -v`)
+- **Node.js**: Version 22.5+ / 24 (`node -v`, `npm -v`)
 - **Python**: Version 3.12 or 3.13 (`python3 -v`)
 - **Google Chrome**: Stable release installed at `/usr/bin/google-chrome`
 - **Playwright Chromium**: Installed via Playwright CLI
