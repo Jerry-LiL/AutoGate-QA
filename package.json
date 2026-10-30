@@ -1,0 +1,15 @@
+{
+  "name": "autogate-qa",
+  "version": "1.0.0",
+  "description": "AutoGate QA - End-to-End Web, Mobile & REST API Regression Automation Suite",
+  "private": true,
+  "scripts": {
+    "start:app": "npm --prefix demo-app start",
+    "reset:app": "npm --prefix demo-app run reset",
+    "test:postman": "newman run postman/AutoGate.postman_collection.json -e postman/local.postman_environment.json -r cli,htmlextra --reporter-htmlextra-export reports/postman/report.html"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
