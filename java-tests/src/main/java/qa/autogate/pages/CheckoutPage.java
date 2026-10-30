@@ -72,8 +72,16 @@ public class CheckoutPage extends BasePage {
         click(step1NextBtn);
     }
 
+    public void waitForShippingNameError() {
+        waitForVisibility(By.cssSelector("[data-testid='error-shipping-name'].visible"));
+    }
+
     public boolean isShippingNameErrorVisible() {
         return isDisplayed(By.cssSelector("[data-testid='error-shipping-name'].visible"));
+    }
+
+    public void waitForShippingPincodeError() {
+        waitForVisibility(By.cssSelector("[data-testid='error-shipping-pincode'].visible"));
     }
 
     public boolean isShippingPincodeErrorVisible() {

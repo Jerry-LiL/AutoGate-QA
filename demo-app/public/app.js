@@ -17,6 +17,9 @@ const app = {
   },
 
   navigate(viewName) {
+    if (window.event && window.event.preventDefault) {
+      try { window.event.preventDefault(); } catch (e) {}
+    }
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     const target = document.getElementById(`${viewName}-view`);
     if (target) {
@@ -26,14 +29,17 @@ const app = {
     if (viewName === 'cart') {
       this.fetchCart();
     } else if (viewName === 'products') {
-      this.fetchProducts();
+      if (!this.products || this.products.length === 0) {
+        this.fetchProducts();
+      }
     }
   },
 
   updateAuthUI() {
-    const greeting = document.getElementById('user-greeting');
+    const greeting = document.getElementById('user-greeting') || document.querySelector('[data-testid="user-greeting"]');
     const loginLink = document.querySelector('[data-testid="nav-login"]');
     const logoutBtn = document.querySelector('[data-testid="nav-logout"]');
+    if (!greeting) return;
 
     if (this.user) {
       greeting.textContent = `Hi, ${this.user.name.split(' ')[0]}`;
@@ -74,8 +80,8 @@ const app = {
       localStorage.setItem('autogate_user', JSON.stringify(this.user));
 
       this.updateAuthUI();
-      await this.fetchCart();
       this.navigate('products');
+      await this.fetchCart();
     } catch (err) {
       errorBox.textContent = 'Network or server error during login';
       errorBox.style.display = 'block';

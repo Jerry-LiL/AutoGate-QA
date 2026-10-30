@@ -29,6 +29,16 @@ public class LoginPage extends BasePage {
         click(submitButton);
     }
 
+    public void waitForLoginSuccess() {
+        waitForVisibility(userGreeting);
+        waitForVisibility(logoutButton);
+        waitForVisibility(By.cssSelector("[data-testid='products-view'].active"));
+    }
+
+    public void waitForLoginError() {
+        waitForVisibility(errorMessage);
+    }
+
     public String getErrorMessage() {
         return getText(errorMessage);
     }
@@ -48,5 +58,6 @@ public class LoginPage extends BasePage {
     public void logout() {
         click(logoutButton);
         waitForVisibility(loginView);
+        waitForVisibility(navLogin);
     }
 }

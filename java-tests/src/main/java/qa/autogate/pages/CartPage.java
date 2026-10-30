@@ -19,8 +19,17 @@ public class CartPage extends BasePage {
         waitForVisibility(cartView);
     }
 
+    public void waitForItemInCart(int productId) {
+        waitForVisibility(By.cssSelector("[data-testid='cart-row-" + productId + "']"));
+    }
+
     public boolean isItemInCart(int productId) {
-        return isDisplayed(By.cssSelector("[data-testid='cart-row-" + productId + "']"));
+        try {
+            waitForItemInCart(productId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String getItemTitle(int productId) {

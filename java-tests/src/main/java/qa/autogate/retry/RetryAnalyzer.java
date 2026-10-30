@@ -9,7 +9,8 @@ public class RetryAnalyzer implements IRetryAnalyzer {
 
     @Override
     public boolean retry(ITestResult result) {
-        if (retryCount < MAX_RETRY_COUNT) {
+        System.out.println("[RETRY_CHECK] test=" + result.getName() + " status=" + result.getStatus() + " isSuccess=" + result.isSuccess());
+        if (result.getStatus() == ITestResult.FAILURE && retryCount < MAX_RETRY_COUNT) {
             retryCount++;
             System.out.println("[RETRY] Retrying test: " + result.getName() + " (Attempt " + (retryCount + 1) + ")");
             return true;

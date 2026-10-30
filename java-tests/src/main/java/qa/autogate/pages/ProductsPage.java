@@ -1,6 +1,7 @@
 package qa.autogate.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -22,7 +23,12 @@ public class ProductsPage extends BasePage {
     public void openProductsPage() {
         open("/");
         waitForVisibility(productsView);
-        waitForVisibility(productGrid);
+        waitForVisibility(By.cssSelector("[data-testid='product-card-1']"));
+    }
+
+    public void waitForProductsLoaded() {
+        waitForVisibility(productsView);
+        waitForVisibility(By.cssSelector("[data-testid='product-card-1']"));
     }
 
     public void search(String keyword) {
@@ -37,6 +43,10 @@ public class ProductsPage extends BasePage {
         return isDisplayed(By.cssSelector("[data-testid='product-card-" + productId + "']"));
     }
 
+    public void waitForProductHidden(int productId) {
+        waitForInvisibility(By.cssSelector("[data-testid='product-card-" + productId + "']"));
+    }
+
     public String getProductTitle(int productId) {
         return getText(By.cssSelector("[data-testid='product-title-" + productId + "']"));
     }
@@ -46,16 +56,32 @@ public class ProductsPage extends BasePage {
     }
 
     public void setProductQuantity(int productId, int quantity) {
-        type(By.cssSelector("[data-testid='product-qty-" + productId + "']"), String.valueOf(quantity));
+        By locator = By.cssSelector("[data-testid='product-qty-" + productId + "']");
+        WebElement input = waitForVisibility(locator);
+        ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input', { bubbles: true })); arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+            input, String.valueOf(quantity));
     }
 
     public void addToCart(int productId) {
         click(By.cssSelector("[data-testid='add-to-cart-" + productId + "']"));
     }
 
+    public void waitForCartToast() {
+        waitForVisibility(toast);
+    }
+
     public int getCartBadgeCount() {
         String text = getText(cartBadge);
         return text.isEmpty() ? 0 : Integer.parseInt(text);
+    }
+
+    public void waitForCartBadgeCount(int expectedCount) {
+        wait.until(driver -> getCartBadgeCount() == expectedCount);
+    }
+
+    public void waitForQuantityError(int productId) {
+        waitForVisibility(By.cssSelector("[data-testid='qty-error-" + productId + "'].visible"));
     }
 
     public boolean isQuantityErrorDisplayed(int productId) {
