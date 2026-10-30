@@ -1,0 +1,16 @@
+{
+  "name": "autogate-demo-app",
+  "version": "1.0.0",
+  "description": "AutoGate Demo Shop - System Under Test",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "reset": "node scripts/seed.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
