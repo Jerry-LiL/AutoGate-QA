@@ -1,0 +1,575 @@
+{
+  "info": {
+    "_postman_id": "a90e386a-73ef-4b47-b35e-c25e362145e1",
+    "name": "AutoGate QA REST API Suite",
+    "description": "Comprehensive regression and boundary test suite for the AutoGate mini shop REST API with token chaining, schema validation, and negative testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Health status is UP', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.eql('UP');",
+              "    pm.expect(jsonData.service).to.eql('AutoGate Mini Shop');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login Admin Success",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@autogate.qa\",\n  \"password\": \"Admin@123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Admin JWT token generated and role is admin', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.expect(jsonData.user.role).to.eql('admin');",
+              "    pm.environment.set('adminToken', jsonData.token);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login Tester Success (Chaining)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"tester@autogate.qa\",\n  \"password\": \"Tester@123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Customer JWT token generated and chained to environment', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.token).to.be.a('string');",
+              "    pm.expect(jsonData.user.email).to.eql('tester@autogate.qa');",
+              "    pm.environment.set('authToken', jsonData.token);",
+              "});",
+              "pm.test('Login response schema is valid', function () {",
+              "    var schema = {",
+              "        type: 'object',",
+              "        required: ['token', 'user'],",
+              "        properties: {",
+              "            token: { type: 'string' },",
+              "            user: {",
+              "                type: 'object',",
+              "                required: ['id', 'email', 'name', 'role'],",
+              "                properties: {",
+              "                    id: { type: 'number' },",
+              "                    email: { type: 'string' },",
+              "                    name: { type: 'string' },",
+              "                    role: { type: 'string' }",
+              "                }",
+              "            }",
+              "        }",
+              "    };",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login Invalid Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"tester@autogate.qa\",\n  \"password\": \"WrongSecret@99\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test('Error message is Invalid email or password', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.eql('Invalid email or password');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login Empty Credentials Validation",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Error indicates email and password are required', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.error).to.eql('Bad Request');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products - Get All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Products array contains at least 6 items', function () {",
+              "    var items = pm.response.json();",
+              "    pm.expect(items).to.be.an('array');",
+              "    pm.expect(items.length).to.be.at.least(6);",
+              "});",
+              "pm.test('Products match array schema', function () {",
+              "    var schema = {",
+              "        type: 'array',",
+              "        items: {",
+              "            type: 'object',",
+              "            required: ['id', 'name', 'price', 'category', 'stock'],",
+              "            properties: {",
+              "                id: { type: 'number' },",
+              "                name: { type: 'string' },",
+              "                price: { type: 'number' },",
+              "                category: { type: 'string' },",
+              "                stock: { type: 'number' }",
+              "            }",
+              "        }",
+              "    };",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products - Get By ID Valid",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "1"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Product details match ID 1', function () {",
+              "    var prod = pm.response.json();",
+              "    pm.expect(prod.id).to.eql(1);",
+              "    pm.expect(prod.name).to.include('UltraSync');",
+              "    pm.expect(prod.price).to.eql(199.99);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products - Get By ID Non-Existent",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/9999",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "9999"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test('Error message confirms product not found', function () {",
+              "    var err = pm.response.json();",
+              "    pm.expect(err.error).to.eql('Not Found');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Add Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 2\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cart",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cart"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Cart response reflects added items', function () {",
+              "    var cart = pm.response.json();",
+              "    pm.expect(cart.items).to.be.an('array');",
+              "    pm.expect(cart.items.length).to.be.at.least(1);",
+              "    pm.expect(cart.totalAmount).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Get Current Cart",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cart",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cart"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Cart items and total calculation present', function () {",
+              "    var cart = pm.response.json();",
+              "    pm.expect(cart).to.have.property('items');",
+              "    pm.expect(cart).to.have.property('totalAmount');",
+              "    pm.expect(cart).to.have.property('itemCount');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Boundary Quantity Exceeded (15)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 2,\n  \"quantity\": 15\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cart",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cart"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test('Validation error returned for quantity exceeding 10', function () {",
+              "    var err = pm.response.json();",
+              "    pm.expect(err.error).to.eql('Validation Error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - Create Order (Chaining)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Postman Newman Runner\",\n    \"addressLine\": \"100 Automation Street\",\n    \"city\": \"Bengaluru\",\n    \"pincode\": \"560001\"\n  },\n  \"paymentMethod\": \"CARD\",\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 1 },\n    { \"productId\": 3, \"quantity\": 1 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Order confirmed with valid ORD- number and saved to environment', function () {",
+              "    var order = pm.response.json();",
+              "    pm.expect(order.orderNumber).to.match(/^ORD-/);",
+              "    pm.expect(order.status).to.eql('CONFIRMED');",
+              "    pm.expect(order.shippingCity).to.eql('Bengaluru');",
+              "    pm.environment.set('createdOrderId', order.id);",
+              "    pm.environment.set('createdOrderNumber', order.orderNumber);",
+              "});",
+              "pm.test('Order matches json schema', function () {",
+              "    var schema = {",
+              "        type: 'object',",
+              "        required: ['id', 'orderNumber', 'status', 'totalAmount', 'items'],",
+              "        properties: {",
+              "            id: { type: 'number' },",
+              "            orderNumber: { type: 'string' },",
+              "            status: { type: 'string' },",
+              "            totalAmount: { type: 'number' },",
+              "            items: { type: 'array' }",
+              "        }",
+              "    };",
+              "    pm.response.to.have.jsonSchema(schema);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - Get Created Order By ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/orders/{{createdOrderId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders", "{{createdOrderId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Retrieved order number matches chained orderNumber', function () {",
+              "    var order = pm.response.json();",
+              "    var expectedOrderNum = pm.environment.get('createdOrderNumber');",
+              "    pm.expect(order.orderNumber).to.eql(expectedOrderNum);",
+              "    pm.expect(order.status).to.eql('CONFIRMED');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders - Pincode Boundary Validation (5 digits)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"shippingAddress\": {\n    \"fullName\": \"Boundary Tester\",\n    \"addressLine\": \"100 Invalid Pincode Rd\",\n    \"city\": \"Bengaluru\",\n    \"pincode\": \"56001\"\n  },\n  \"paymentMethod\": \"CARD\",\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 1 }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "orders"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 422', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "pm.test('Error specifies pincode validation failure', function () {",
+              "    var err = pm.response.json();",
+              "    pm.expect(err.field).to.eql('pincode');",
+              "    pm.expect(err.message).to.eql('Pincode must be exactly 6 numeric digits');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart - Clear Cart",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{authToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cart",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cart"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Cart is empty after clear', function () {",
+              "    var cart = pm.response.json();",
+              "    pm.expect(cart.items).to.be.an('array');",
+              "    pm.expect(cart.items.length).to.eql(0);",
+              "    pm.expect(cart.totalAmount).to.eql(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
