@@ -18,7 +18,7 @@ This directory contains automated regression tests for Android mobile applicatio
 ## Prerequisites
 
 1. **Java JDK 17+** and **Android SDK Command-line Tools** (`$ANDROID_HOME` configured).
-2. **Node.js 20+** and **Appium 2**:
+2. **Node.js 22.5+** and **Appium 2**:
    ```bash
    npm install -g appium
    appium driver install uiautomator2
