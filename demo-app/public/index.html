@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGate QA Mini Shop</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <a href="#" class="brand" data-testid="brand-logo" onclick="app.navigate('products')">AutoGate Shop</a>
+    <nav>
+      <a href="#" data-testid="nav-products" onclick="app.navigate('products')">Products</a>
+      <a href="#" data-testid="nav-cart" onclick="app.navigate('cart')">
+        Cart <span class="badge" data-testid="cart-badge">0</span>
+      </a>
+      <span data-testid="user-greeting" style="font-weight: 600; display: none;"></span>
+      <a href="#" data-testid="nav-login" onclick="app.navigate('login')">Login</a>
+      <button data-testid="nav-logout" onclick="app.logout()" style="display: none;">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- LOGIN VIEW -->
+    <section id="login-view" class="view-section" data-testid="login-view">
+      <div class="card" style="max-width: 440px; margin: 2rem auto;">
+        <h2 style="margin-bottom: 1.25rem;">Account Login</h2>
+        <div id="login-error" class="alert alert-danger" data-testid="login-error" style="display: none;"></div>
+        <form id="login-form" onsubmit="app.handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-control" data-testid="login-email" placeholder="tester@autogate.qa" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-control" data-testid="login-password" placeholder="Tester@123" required>
+          </div>
+          <button type="submit" class="btn" style="width: 100%;" data-testid="login-submit">Sign In</button>
+        </form>
+        <div style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1rem;">
+          <p><strong>Demo Accounts:</strong></p>
+          <p>Admin: <code>admin@autogate.qa</code> / <code>Admin@123</code></p>
+          <p>Tester: <code>tester@autogate.qa</code> / <code>Tester@123</code></p>
+          <p>Shopper: <code>shopper@autogate.qa</code> / <code>Shopper@123</code></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS VIEW -->
+    <section id="products-view" class="view-section active" data-testid="products-view">
+      <div class="filter-bar">
+        <input type="text" id="search-input" class="form-control" style="max-width: 280px;" data-testid="search-input" placeholder="Search products..." oninput="app.handleFilter()">
+        <select id="category-filter" class="form-control" style="max-width: 200px;" data-testid="category-filter" onchange="app.handleFilter()">
+          <option value="">All Categories</option>
+          <option value="Wearables">Wearables</option>
+          <option value="Audio">Audio</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Displays">Displays</option>
+        </select>
+      </div>
+
+      <div id="product-grid" class="grid" data-testid="product-grid">
+        <!-- Loaded dynamically -->
+      </div>
+    </section>
+
+    <!-- CART VIEW -->
+    <section id="cart-view" class="view-section" data-testid="cart-view">
+      <div class="card">
+        <h2 style="margin-bottom: 1.25rem;">Shopping Cart</h2>
+        <div id="empty-cart-msg" data-testid="empty-cart-msg" style="display: none; padding: 2rem; text-align: center; color: var(--text-muted);">
+          Your cart is currently empty. <a href="#" onclick="app.navigate('products')">Continue shopping</a>
+        </div>
+        <div id="cart-content">
+          <table data-testid="cart-items-list">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cart-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+            <button class="btn btn-outline" data-testid="clear-cart-btn" onclick="app.clearCart()">Clear Cart</button>
+            <div style="text-align: right;">
+              <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem;">
+                Total: $<span id="cart-total-amount" data-testid="cart-total-amount">0.00</span>
+              </div>
+              <button class="btn" data-testid="proceed-checkout-btn" onclick="app.startCheckout()">Proceed to Checkout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MULTI-STEP CHECKOUT VIEW -->
+    <section id="checkout-view" class="view-section" data-testid="checkout-view">
+      <div class="card" style="max-width: 650px; margin: 0 auto;">
+        <!-- Step Navigation Bar -->
+        <div class="steps-nav">
+          <div id="step-indicator-1" class="step-tab active" data-testid="step-indicator-1">1. Shipping</div>
+          <div id="step-indicator-2" class="step-tab" data-testid="step-indicator-2">2. Payment</div>
+          <div id="step-indicator-3" class="step-tab" data-testid="step-indicator-3">3. Review</div>
+          <div id="step-indicator-4" class="step-tab" data-testid="step-indicator-4">4. Confirmation</div>
+        </div>
+
+        <!-- STEP 1: SHIPPING -->
+        <div id="checkout-step-1" class="wizard-step active" data-testid="checkout-step-1">
+          <h3 style="margin-bottom: 1rem;">Shipping Details</h3>
+          <div class="form-group">
+            <label for="shipping-name">Full Name *</label>
+            <input type="text" id="shipping-name" class="form-control" data-testid="shipping-name" placeholder="John Doe">
+            <div id="error-shipping-name" class="form-error" data-testid="error-shipping-name">Full name is required (minimum 2 characters)</div>
+          </div>
+          <div class="form-group">
+            <label for="shipping-address">Street Address *</label>
+            <input type="text" id="shipping-address" class="form-control" data-testid="shipping-address" placeholder="123 Automation Blvd, Suite 101">
+            <div id="error-shipping-address" class="form-error" data-testid="error-shipping-address">Address is required (minimum 5 characters)</div>
+          </div>
+          <div class="form-group">
+            <label for="shipping-city">City *</label>
+            <input type="text" id="shipping-city" class="form-control" data-testid="shipping-city" placeholder="Bengaluru">
+            <div id="error-shipping-city" class="form-error" data-testid="error-shipping-city">City is required (minimum 2 characters)</div>
+          </div>
+          <div class="form-group">
+            <label for="shipping-pincode">Postal / Pincode (6 digits) *</label>
+            <input type="text" id="shipping-pincode" class="form-control" data-testid="shipping-pincode" placeholder="560001">
+            <div id="error-shipping-pincode" class="form-error" data-testid="error-shipping-pincode">Pincode must be exactly 6 numeric digits</div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button class="btn" data-testid="step1-next-btn" onclick="app.validateStep1()">Continue to Payment</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: PAYMENT -->
+        <div id="checkout-step-2" class="wizard-step" data-testid="checkout-step-2">
+          <h3 style="margin-bottom: 1rem;">Payment Method</h3>
+          <div class="form-group">
+            <label for="payment-method-select">Select Method</label>
+            <select id="payment-method-select" class="form-control" data-testid="payment-method-select" onchange="app.handlePaymentMethodChange()">
+              <option value="CARD">Credit / Debit Card</option>
+              <option value="UPI">UPI Instant Payment</option>
+              <option value="COD">Cash on Delivery</option>
+            </select>
+          </div>
+
+          <div id="card-fields">
+            <div class="form-group">
+              <label for="card-number">Card Number (16 digits) *</label>
+              <input type="text" id="card-number" class="form-control" data-testid="card-number" placeholder="4111222233334444" maxlength="16">
+              <div id="error-card-number" class="form-error" data-testid="error-card-number">Card number must be 16 numeric digits</div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <div class="form-group" style="flex: 1;">
+                <label for="card-expiry">Expiry (MM/YY) *</label>
+                <input type="text" id="card-expiry" class="form-control" data-testid="card-expiry" placeholder="12/28" maxlength="5">
+                <div id="error-card-expiry" class="form-error" data-testid="error-card-expiry">Expiry format must be MM/YY</div>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="card-cvv">CVV (3 digits) *</label>
+                <input type="password" id="card-cvv" class="form-control" data-testid="card-cvv" placeholder="123" maxlength="3">
+                <div id="error-card-cvv" class="form-error" data-testid="error-card-cvv">CVV must be 3 digits</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+            <button class="btn btn-secondary" data-testid="step2-back-btn" onclick="app.goToStep(1)">Back</button>
+            <button class="btn" data-testid="step2-next-btn" onclick="app.validateStep2()">Review Order</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: REVIEW -->
+        <div id="checkout-step-3" class="wizard-step" data-testid="checkout-step-3">
+          <h3 style="margin-bottom: 1rem;">Review Order</h3>
+          <div id="checkout-error-msg" class="alert alert-danger" data-testid="checkout-error-msg" style="display: none;"></div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.35rem;">Shipping Address</h4>
+            <div id="review-shipping-details" data-testid="review-shipping-details" style="padding: 0.75rem; background: #f1f5f9; border-radius: 6px; font-size: 0.9rem;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.35rem;">Payment Method</h4>
+            <div id="review-payment-details" data-testid="review-payment-details" style="padding: 0.75rem; background: #f1f5f9; border-radius: 6px; font-size: 0.9rem;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.35rem;">Order Items</h4>
+            <div id="review-items-list" data-testid="review-items-list" style="padding: 0.75rem; background: #f1f5f9; border-radius: 6px; font-size: 0.9rem;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-bottom: 1.5rem;">
+            <span style="font-size: 1.25rem; font-weight: 700;">Total: $<span id="review-total-amount" data-testid="review-total-amount">0.00</span></span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between;">
+            <button class="btn btn-secondary" data-testid="step3-back-btn" onclick="app.goToStep(2)">Back</button>
+            <button class="btn" data-testid="place-order-btn" onclick="app.submitOrder()">Place Order</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: CONFIRMATION -->
+        <div id="checkout-step-4" class="wizard-step" data-testid="checkout-step-4">
+          <div id="order-success-banner" class="alert alert-success" data-testid="order-success-banner" style="text-align: center; padding: 1.5rem;">
+            <h3 style="margin-bottom: 0.5rem;">Order Placed Successfully!</h3>
+            <p>Thank you for your purchase. Your order has been recorded.</p>
+          </div>
+
+          <div style="margin: 1.5rem 0; padding: 1rem; border: 1px dashed var(--border); border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>Order Number:</strong> <span id="order-confirmation-number" data-testid="order-confirmation-number"></span></p>
+            <p style="margin-bottom: 0.5rem;"><strong>Status:</strong> <span id="order-confirmation-status" class="badge" style="background: var(--success);" data-testid="order-confirmation-status">CONFIRMED</span></p>
+            <p style="margin-bottom: 0.5rem;"><strong>Total Paid:</strong> $<span id="order-confirmation-total" data-testid="order-confirmation-total"></span></p>
+            <p><strong>Shipping To:</strong> <span id="order-confirmation-shipping" data-testid="order-confirmation-shipping"></span></p>
+          </div>
+
+          <div style="text-align: center; margin-top: 1.5rem;">
+            <button class="btn" data-testid="continue-shopping-btn" onclick="app.navigate('products')">Continue Shopping</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="cart-toast" class="toast" data-testid="cart-toast">Item added to cart!</div>
+
+  <footer>
+    AutoGate QA Regression Automation Suite &bull; Realistic SDET Test Environment
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
