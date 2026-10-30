@@ -1,0 +1,157 @@
+name: AutoGate CI
+
+"on":
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  java-ui-api:
+    name: Java UI & API Regression (Selenium 4 + TestNG + REST Assured)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17 Temurin
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: demo-app/package-lock.json
+
+      - name: Install Demo App Dependencies & Start Server
+        run: |
+          cd demo-app
+          npm ci
+          npm run reset
+          npm start &
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health | grep -q '"status":"UP"'; then
+              echo "Demo app is UP and healthy"
+              break
+            fi
+            echo "Waiting for demo app... attempt $i"
+            sleep 1
+          done
+
+      - name: Run Java Test Suite (TestNG 4 Threads)
+        run: mvn -f java-tests/pom.xml clean test
+
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: java-tests/target/allure-results
+          retention-days: 14
+
+  python-ui-api:
+    name: Python UI & API Regression (Playwright + PyTest + Requests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: python-tests/requirements.txt
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: demo-app/package-lock.json
+
+      - name: Install Demo App Dependencies & Start Server
+        run: |
+          cd demo-app
+          npm ci
+          npm run reset
+          npm start &
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health | grep -q '"status":"UP"'; then
+              echo "Demo app is UP and healthy"
+              break
+            fi
+            echo "Waiting for demo app... attempt $i"
+            sleep 1
+          done
+
+      - name: Install Python Dependencies & Playwright Chromium
+        run: |
+          python -m venv python-tests/.venv
+          source python-tests/.venv/bin/activate
+          pip install --upgrade pip
+          pip install -r python-tests/requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Run Python Test Suite (pytest-xdist -n 4)
+        run: |
+          source python-tests/.venv/bin/activate
+          cd python-tests
+          mkdir -p reports
+          pytest -n 4 --html=reports/report.html --self-contained-html
+
+      - name: Upload PyTest HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: python-tests/reports/
+          retention-days: 14
+
+  newman:
+    name: Newman REST API Regression Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install Root & Demo App Dependencies
+        run: |
+          npm ci
+          cd demo-app
+          npm ci
+          npm run reset
+          npm start &
+          for i in {1..30}; do
+            if curl -s http://localhost:3000/health | grep -q '"status":"UP"'; then
+              echo "Demo app is UP and healthy"
+              break
+            fi
+            echo "Waiting for demo app... attempt $i"
+            sleep 1
+          done
+
+      - name: Run Newman Postman Collection
+        run: |
+          mkdir -p reports/postman
+          npm run test:postman
+
+      - name: Upload Newman HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-html-report
+          path: reports/postman/
+          retention-days: 14
