@@ -1,4 +1,4 @@
-name: AutoGate CI
+name: CI
 
 "on":
   push:
@@ -8,7 +8,7 @@ name: AutoGate CI
 
 jobs:
   java-ui-api:
-    name: Java UI & API Regression (Selenium 4 + TestNG + REST Assured)
+    name: java
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -55,7 +55,7 @@ jobs:
           retention-days: 14
 
   python-ui-api:
-    name: Python UI & API Regression (Playwright + PyTest + Requests)
+    name: python
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -114,7 +114,7 @@ jobs:
           retention-days: 14
 
   newman:
-    name: Newman REST API Regression Suite
+    name: newman
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
